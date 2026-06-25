@@ -26,6 +26,13 @@ This skill's own files live under `~/.claude/skills/lecture-to-anki/`,
 `~/.cursor/skills/lecture-to-anki/`, or the portable `~/.agents/skills/lecture-to-anki/`
 alias — outside the current course folder. It also talks to AnkiConnect on every run.
 
+> **Windows note:** `~` conventionally means your user home directory
+> (`%USERPROFILE%` on Windows). Project paths starting with `.` (e.g.
+> `.cursor/skills/`) are relative to the current folder and work identically
+> on all platforms. Prefer project-scoped installs (`.cursor/skills/`,
+> `.gemini/skills/`, etc.) and the tool's `install`/`link` commands when
+> available. See the README for full Windows guidance.
+
 **Claude Code:** Add the entries from `permissions.json` (shipped in the skill) to
 `~/.claude/settings.json` under `permissions.allow`:
 
@@ -50,16 +57,23 @@ directory under `~/.gemini/skills/` (or `~/.agents/skills/`). Gemini prompts for
 consent the first time a skill activates in a session.
 
 **Cursor:** Place the skill under `~/.cursor/skills/` or `.cursor/skills/` (or the
-`.agents/skills/` alias). Cursor manages access via its IDE approvals in Agent
+`.agents/skills/` alias). The project-relative `.cursor/skills/` version is the
+most reliable on Windows. Cursor manages access via its IDE approvals in Agent
 mode.
 
 **Cross-tool AnkiConnect pattern (recommended):** For reliability across tools
-(especially when shell escaping is involved), continue using simple `curl -s`
-calls for read-only checks and writing complex payloads (card content with
-unicode, quotes, etc.) to the fixed path `/tmp/anki_call.py` then running
-`python3 /tmp/anki_call.py`. For tools with native file tools (Grok `write`,
-Gemini/Cursor write operations), the agent may also directly create files in the
-lecture folder.
+(especially when shell escaping is involved), use simple `curl -s` calls for
+read-only checks. For complex payloads (card content with unicode, quotes,
+etc.), write them to a temporary script and execute it:
+
+- Linux/macOS: `/tmp/anki_call.py` + `python3 /tmp/anki_call.py`
+- Windows: `%TEMP%\anki_call.py` (or a file in the current lecture folder) +
+  `python ...`
+
+For tools with good native file tools (Grok `write`, Gemini/Cursor edit tools),
+the agent can also create the payload file directly in the lecture-materials
+directory and run it from there. The key is using a *predictable fixed location*
+so any allow/approval rules you set continue to match.
 
 ## Hard rules (from direct user feedback)
 
@@ -155,7 +169,7 @@ Run `modelNames` first. If either custom type is missing on the active profile, 
 - Lecture: `<CourseCode>::L<n>` (e.g. `TW1-11::L1`)
 - Topics: lowercase, specific (e.g. `implication`, `definitions`, `equivalences`, `translation`)
 
-**Push and verify.** `createModel`, `addNotes`, and any other call carrying card content (cloze text, Dutch/accented characters, embedded quotes) should be written to `/tmp/anki_call.py` (overwrite, don't use a fresh filename) and run as `python3 /tmp/anki_call.py` — see "Setup" above for why. Push into the exact deck from Step 0, then immediately confirm with `findNotes` + `notesInfo` that the added count matches what was approved and the `Source`/fields are populated. Report the result — e.g. "added 6 cards to `Mathematics`, all with Source `TW1-11 · Proof Techniques, Les 1 · Propositional Logic`." If `addNotes` returns any `null` (a duplicate Anki rejected), say which card and why rather than reporting silent success.
+**Push and verify.** `createModel`, `addNotes`, and any other call carrying card content (cloze text, Dutch/accented characters, embedded quotes) should use a predictable temp script location as described in the Setup section above (e.g. `/tmp/anki_call.py` on Unix or a file in the lecture folder). Push into the exact deck from Step 0, then immediately confirm with `findNotes` + `notesInfo` that the added count matches what was approved and the `Source`/fields are populated. Report the result — e.g. "added 6 cards to `Mathematics`, all with Source `TW1-11 · Proof Techniques, Les 1 · Propositional Logic`." If `addNotes` returns any `null` (a duplicate Anki rejected), say which card and why rather than reporting silent success.
 
 ## Files in this skill
 

@@ -39,12 +39,58 @@ The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 
 ## Install
 
+### Path conventions (cross-platform)
+
+- Paths using `~` (e.g. `~/.cursor/skills/`) refer to your home directory.
+  On Windows this is typically `%USERPROFILE%` (e.g. `C:\Users\YourName`).
+  Most terminals used with these tools (Git Bash, PowerShell, Cursor's
+  integrated terminal, WSL) understand `~` or the tool will expand it.
+- Project paths that start with a dot (e.g. `.cursor/skills/`) live inside your
+  repository. These work identically on Windows, macOS, and Linux.
+- Whenever possible, prefer the tool's dedicated install command (e.g.
+  `gemini skills install`) over manual cloning — they handle the correct
+  location for your platform.
+
+### Windows users
+
+Cursor (and the other tools) are commonly used on Windows. Follow these
+practices for the smoothest experience:
+
+- **Project-scoped skills are the most reliable** — they live inside your
+  course folder and avoid any home-directory differences:
+  ```powershell
+  # Cursor (recommended)
+  git clone https://github.com/joffreywallaart/lecture-to-anki.git .cursor/skills/lecture-to-anki
+
+  # Gemini CLI
+  git clone https://github.com/joffreywallaart/lecture-to-anki.git .gemini/skills/lecture-to-anki
+  ```
+
+- Prefer the tool's built-in install command (handles platform paths for you):
+  ```powershell
+  gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git --scope workspace
+  ```
+
+- When installing to a global/user location, use PowerShell:
+  ```powershell
+  git clone https://github.com/joffreywallaart/lecture-to-anki.git "$env:USERPROFILE\.cursor\skills\lecture-to-anki"
+  # or
+  git clone ... "$env:USERPROFILE\.gemini\skills\lecture-to-anki"
+  ```
+
+- Use Cursor's integrated terminal or Git Bash rather than the classic Command
+  Prompt (`cmd.exe`) — they handle `~` and paths much more reliably.
+
+- The `.agents/skills/` alias works across many tools and can be a neutral
+  portable option.
+
 ### Claude Code
 
 Clone into the Claude skills folder:
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
+# Windows: $env:USERPROFILE\.claude\skills\lecture-to-anki
 ```
 
 Then merge the contents of [`permissions.json`](permissions.json) into
@@ -65,6 +111,7 @@ Or install to Grok's native location:
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.grok/skills/lecture-to-anki
+# Windows PowerShell: $env:USERPROFILE\.grok\skills\lecture-to-anki
 ```
 
 Grok uses interactive approvals instead of a static allowlist file. When the skill
@@ -77,11 +124,13 @@ No changes to `~/.grok/config.toml` are required for basic use.
 Gemini CLI has native `gemini skills` management and discovers skills in
 `~/.gemini/skills/` (and the portable `~/.agents/skills/` alias).
 
-**Easiest:** Install directly from the repo:
+**Recommended (works on Windows, macOS, and Linux):**
 
 ```bash
 gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git
 ```
+
+This is the easiest and most cross-platform method.
 
 **Manual / development:**
 
@@ -89,6 +138,9 @@ gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.gemini/skills/lecture-to-anki
 # or the portable alias:
 # git clone ... ~/.agents/skills/lecture-to-anki
+
+# Windows PowerShell equivalent:
+# git clone ... "$env:USERPROFILE\.gemini\skills\lecture-to-anki"
 ```
 
 Or link a local checkout:
@@ -109,19 +161,14 @@ Use `--scope workspace` with `install` or `link` if you want it project-scoped
 Cursor discovers skills for compatibility from `~/.cursor/skills/` and project
 `.cursor/skills/`, as well as the portable `.agents/skills/` alias.
 
-Clone or link the skill:
+See the **Windows users** section above for the recommended PowerShell commands
+and why project scope is preferred.
 
-```bash
-git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.cursor/skills/lecture-to-anki
-```
-
-Or for workspace/project scope (recommended when working inside a course repo):
+Project example:
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git .cursor/skills/lecture-to-anki
 ```
-
-Cursor also respects `~/.agents/skills/lecture-to-anki`.
 
 Cursor handles approvals in the IDE (chat composer / agent mode). No separate
 permissions file is needed. The skill activates when your prompt matches the
