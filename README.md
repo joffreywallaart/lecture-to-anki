@@ -1,7 +1,7 @@
 # lecture-to-anki
 
-A skill (Claude Code, Grok Build, Gemini CLI, Cursor) for turning a lecture's
-materials into a quick self-quiz, and then a small, reviewed Anki deck.
+A skill for turning a lecture's materials into a quick self-quiz, and then a small,
+reviewed Anki deck. Works with Claude Code, Gemini CLI, Grok Build, and Cursor.
 
 ## Why
 
@@ -39,156 +39,52 @@ The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 
 ## Install
 
-### Path conventions (cross-platform)
+On Windows, use PowerShell, Git Bash, or WSL, and substitute `~` with
+`$env:USERPROFILE` if your shell doesn't expand it.
 
-- Paths using `~` (e.g. `~/.cursor/skills/`) refer to your home directory.
-  On Windows this is typically `%USERPROFILE%` (e.g. `C:\Users\YourName`).
-  Most terminals used with these tools (Git Bash, PowerShell, Cursor's
-  integrated terminal, WSL) understand `~` or the tool will expand it.
-- Project paths that start with a dot (e.g. `.cursor/skills/`) live inside your
-  repository. These work identically on Windows, macOS, and Linux.
-- Whenever possible, prefer the tool's dedicated install command (e.g.
-  `gemini skills install`) over manual cloning — they handle the correct
-  location for your platform.
-
-### Windows users
-
-Cursor (and the other tools) are commonly used on Windows. Follow these
-practices for the smoothest experience:
-
-- **Project-scoped skills are the most reliable** — they live inside your
-  course folder and avoid any home-directory differences:
-  ```powershell
-  # Cursor (recommended)
-  git clone https://github.com/joffreywallaart/lecture-to-anki.git .cursor/skills/lecture-to-anki
-
-  # Gemini CLI
-  git clone https://github.com/joffreywallaart/lecture-to-anki.git .gemini/skills/lecture-to-anki
-  ```
-
-- Prefer the tool's built-in install command (handles platform paths for you):
-  ```powershell
-  gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git --scope workspace
-  ```
-
-- When installing to a global/user location, use PowerShell:
-  ```powershell
-  git clone https://github.com/joffreywallaart/lecture-to-anki.git "$env:USERPROFILE\.cursor\skills\lecture-to-anki"
-  # or
-  git clone ... "$env:USERPROFILE\.gemini\skills\lecture-to-anki"
-  ```
-
-- Use Cursor's integrated terminal or Git Bash rather than the classic Command
-  Prompt (`cmd.exe`) — they handle `~` and paths much more reliably.
-
-- The `.agents/skills/` alias works across many tools and can be a neutral
-  portable option.
-
-### Claude Code
-
-Clone into the Claude skills folder:
-
-```bash
-git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
-# Windows: $env:USERPROFILE\.claude\skills\lecture-to-anki
-```
-
-Then merge the contents of [`permissions.json`](permissions.json) into
-`~/.claude/settings.json` under `permissions.allow`. This prevents repeated
-permission prompts for reading the skill's own files and talking to AnkiConnect.
-
-### Grok Build
-
-Grok discovers skills from both `~/.claude/skills/` (for compatibility) and `~/.grok/skills/`.
-
-You can install to the Claude-compatible location (recommended if you use both tools):
+**Claude Code**
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
 ```
 
-Or install to Grok's native location:
+Merge [`permissions.json`](permissions.json) into `~/.claude/settings.json`
+(`permissions.allow`) to avoid repeated permission prompts.
 
-```bash
-git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.grok/skills/lecture-to-anki
-# Windows PowerShell: $env:USERPROFILE\.grok\skills\lecture-to-anki
-```
-
-Grok uses interactive approvals instead of a static allowlist file. When the skill
-needs to read its own files or call AnkiConnect it will prompt; choose "Always allow"
-for the relevant commands (or for the whole session) to avoid repeated prompts.
-No changes to `~/.grok/config.toml` are required for basic use.
-
-### Gemini CLI
-
-Gemini CLI has native `gemini skills` management and discovers skills in
-`~/.gemini/skills/` (and the portable `~/.agents/skills/` alias).
-
-**Recommended (works on Windows, macOS, and Linux):**
+**Gemini CLI**
 
 ```bash
 gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git
 ```
 
-This is the easiest and most cross-platform method.
+Or clone manually into `~/.gemini/skills/lecture-to-anki`.
 
-**Manual / development:**
-
-```bash
-git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.gemini/skills/lecture-to-anki
-# or the portable alias:
-# git clone ... ~/.agents/skills/lecture-to-anki
-
-# Windows PowerShell equivalent:
-# git clone ... "$env:USERPROFILE\.gemini\skills\lecture-to-anki"
-```
-
-Or link a local checkout:
+**Grok Build**
 
 ```bash
-gemini skills link /path/to/lecture-to-anki
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
+# or Grok's native location: ~/.grok/skills/lecture-to-anki
 ```
 
-Gemini will prompt for consent the first time the skill is activated in a
-session (it gets access to the skill directory). Use `/skills list` inside Gemini
-to see installed skills.
+Grok approves tool calls interactively instead of via a permissions file — choose
+"Always allow" the first time it reads the skill's files or calls AnkiConnect.
 
-Use `--scope workspace` with `install` or `link` if you want it project-scoped
-(placed in `.gemini/skills/` or `.agents/skills/` inside the repo).
-
-### Cursor
-
-Cursor discovers skills for compatibility from `~/.cursor/skills/` and project
-`.cursor/skills/`, as well as the portable `.agents/skills/` alias.
-
-See the **Windows users** section above for the recommended PowerShell commands
-and why project scope is preferred.
-
-Project example:
+**Cursor**
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git .cursor/skills/lecture-to-anki
 ```
 
-Cursor handles approvals in the IDE (chat composer / agent mode). No separate
-permissions file is needed. The skill activates when your prompt matches the
-description (e.g. "turn this lecture into Anki cards") or you reference it
-explicitly. You can manage Cursor rules and context in the usual `.cursor/rules/`
-or settings UI alongside this.
+Project-scoped is recommended so the skill travels with the course folder.
 
 ## Use
 
-From a folder with lecture materials, describe the task in natural language
-(e.g. "turn this lecture into Anki cards") or invoke the skill directly:
+From a folder with lecture materials, describe the task ("turn this lecture into
+Anki cards") or invoke `/lecture-to-anki` directly (Claude Code, Grok Build). Gemini
+CLI and Cursor activate on a matching description.
 
-- Claude Code: `/lecture-to-anki`
-- Grok Build: `/lecture-to-anki`
-- Gemini CLI: Describe the task (skill activates on matching description); manage
-  with `/skills` or `gemini skills`
-- Cursor: Describe the task in Agent / Composer (or reference the skill name)
-
-The first time it runs it will ask which deck to use and record the choice (in
-`CLAUDE.md`, `GEMINI.md`, or equivalent project notes). Subsequent runs reuse it.
+The first time it runs it asks which deck to use and records the choice in
+`CLAUDE.md` (or the equivalent project notes for your tool). Later runs reuse it.
 
 ## Design notes
 
