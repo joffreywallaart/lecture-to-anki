@@ -42,7 +42,7 @@ The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 Clone (or copy) this repo into your Claude Code skills folder:
 
 ```bash
-git clone <repo-url> ~/.claude/skills/lecture-to-anki
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
 ```
 
 Then add the entries from [`permissions.json`](permissions.json) to your
