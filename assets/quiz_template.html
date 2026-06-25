@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz — {{LECTURE_TITLE}}</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; background: #fff; }
+  h1 { font-size: 1.3rem; }
+  .progress { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+  .q { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .q p.question { font-weight: 600; margin-top: 0; }
+  .answer { display: none; background: #f4f4f4; border-radius: 6px; padding: 0.75rem; margin-top: 0.5rem; white-space: pre-line; }
+  .answer.show { display: block; }
+  .rate { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+  button { cursor: pointer; border-radius: 6px; border: 1px solid #bbb; background: #fff; color: #222; padding: 0.55rem 0.9rem; font-size: 0.9rem; min-height: 44px; }
+  button:disabled { cursor: not-allowed; opacity: 0.45; }
+  button:focus-visible { outline: 3px solid #2266cc; outline-offset: 2px; }
+  button.active-know { background: #d7f0d7; border-color: #5a9; font-weight: 600; }
+  button.active-shaky { background: #fdf0c2; border-color: #cb9; font-weight: 600; }
+  button.active-no { background: #f5d0d0; border-color: #c77; font-weight: 600; }
+  button.active-know::before, button.active-shaky::before, button.active-no::before { content: "✓ "; }
+  #summary { border: 2px solid #888; border-radius: 8px; padding: 1rem; margin-top: 1.5rem; }
+  #copyBtn { margin-top: 0.5rem; }
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #181818; color: #eee; }
+    .q { border-color: #444; }
+    .answer { background: #262626; }
+    button { background: #2a2a2a; color: #eee; border-color: #555; }
+    button.active-know { background: #1f3d24; border-color: #5a9; }
+    button.active-shaky { background: #4d4317; border-color: #cb9; }
+    button.active-no { background: #4d1f1f; border-color: #c77; }
+    #summary { border-color: #666; }
+    .progress { color: #aaa; }
+  }
+</style>
+</head>
+<body>
+<h1>Quiz — {{LECTURE_TITLE}}</h1>
+<p>Answer each question yourself first, then click "Show answer" and rate yourself. A summary to paste back into the chat appears at the bottom.</p>
+
+<div class="progress" id="progress"></div>
+<div id="quiz"></div>
+
+<div id="summary">
+  <strong>Summary</strong>
+  <div id="summaryText">Rate a few questions first.</div>
+  <button id="copyBtn">Copy summary</button>
+</div>
+
+<script>
+// Replace with [question, answer] string pairs. Answers may contain HTML.
+const questions = [
+  {{QUESTION_DATA_ARRAY}}
+];
+
+const quizDiv = document.getElementById("quiz");
+const ratings = new Array(questions.length).fill(null);
+
+questions.forEach((q, i) => {
+  const div = document.createElement("div");
+  div.className = "q";
+  div.innerHTML = `
+    <p class="question">${i + 1}. ${q[0]}</p>
+    <button class="toggleBtn">Show answer</button>
+    <div class="answer">${q[1]}</div>
+    <div class="rate">
+      <button class="r-know" disabled>Knew it</button>
+      <button class="r-shaky" disabled>Unsure</button>
+      <button class="r-no" disabled>Didn't know</button>
+    </div>
+  `;
+  quizDiv.appendChild(div);
+
+  const rateButtons = {
+    know: div.querySelector(".r-know"),
+    shaky: div.querySelector(".r-shaky"),
+    no: div.querySelector(".r-no"),
+  };
+
+  div.querySelector(".toggleBtn").onclick = () => {
+    div.querySelector(".answer").classList.toggle("show");
+    Object.values(rateButtons).forEach(b => b.disabled = false);
+  };
+
+  const setRating = (val) => {
+    ratings[i] = val;
+    Object.values(rateButtons).forEach(b =>
+      b.classList.remove("active-know", "active-shaky", "active-no"));
+    rateButtons[val].classList.add("active-" + val);
+    updateSummary();
+  };
+  rateButtons.know.onclick = () => setRating("know");
+  rateButtons.shaky.onclick = () => setRating("shaky");
+  rateButtons.no.onclick = () => setRating("no");
+});
+
+function updateSummary() {
+  const shaky = [];
+  const no = [];
+  ratings.forEach((r, i) => {
+    if (r === "shaky") shaky.push(i + 1);
+    if (r === "no") no.push(i + 1);
+  });
+  const done = ratings.filter(r => r).length;
+  document.getElementById("progress").innerText = `${done}/${questions.length} rated`;
+  const lines = [
+    `Rated: ${done}/${questions.length}`,
+    `Unsure on questions: ${shaky.join(", ") || "none"}`,
+    `Didn't know questions: ${no.join(", ") || "none"}`,
+  ];
+  document.getElementById("summaryText").innerText = lines.join("\n");
+}
+
+document.getElementById("copyBtn").onclick = async () => {
+  const text = document.getElementById("summaryText").innerText;
+  const done = () => {
+    document.getElementById("copyBtn").innerText = "Copied!";
+    setTimeout(() => { document.getElementById("copyBtn").innerText = "Copy summary"; }, 1500);
+  };
+  try {
+    await navigator.clipboard.writeText(text);
+    done();
+  } catch (e) {
+    // clipboard API blocked on file:// in some browsers — fall back to manual select
+    const r = document.createRange();
+    r.selectNode(document.getElementById("summaryText"));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+    try { document.execCommand("copy"); done(); } catch (_) {}
+  }
+};
+
+updateSummary();
+</script>
+</body>
+</html>

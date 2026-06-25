@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.claude/skills/lecture-to-anki/**)",
+      "Bash(curl -s http://127.0.0.1:8765*)",
+      "Bash(python3 /tmp/anki_call.py)"
+    ]
+  }
+}
