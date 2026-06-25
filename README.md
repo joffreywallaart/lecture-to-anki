@@ -1,7 +1,7 @@
 # lecture-to-anki
 
-A Claude Code skill for turning a lecture's materials into a quick self-quiz, and then
-a small, reviewed Anki deck.
+A skill (Claude Code, Grok Build, Gemini CLI, Cursor) for turning a lecture's
+materials into a quick self-quiz, and then a small, reviewed Anki deck.
 
 ## Why
 
@@ -35,26 +35,113 @@ The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 
 - [Anki](https://apps.ankiweb.net/) desktop, running
 - The [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on
-- Claude Code
+- One of: Claude Code, Grok Build, Gemini CLI, or Cursor
 
 ## Install
 
-Clone (or copy) this repo into your Claude Code skills folder:
+### Claude Code
+
+Clone into the Claude skills folder:
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
 ```
 
-Then add the entries from [`permissions.json`](permissions.json) to your
-`~/.claude/settings.json`, under `permissions.allow`. Otherwise you'll get a permission
-prompt every time the skill talks to AnkiConnect or reads its own files, since those
-live outside whatever course folder you happen to be working in.
+Then merge the contents of [`permissions.json`](permissions.json) into
+`~/.claude/settings.json` under `permissions.allow`. This prevents repeated
+permission prompts for reading the skill's own files and talking to AnkiConnect.
+
+### Grok Build
+
+Grok discovers skills from both `~/.claude/skills/` (for compatibility) and `~/.grok/skills/`.
+
+You can install to the Claude-compatible location (recommended if you use both tools):
+
+```bash
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
+```
+
+Or install to Grok's native location:
+
+```bash
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.grok/skills/lecture-to-anki
+```
+
+Grok uses interactive approvals instead of a static allowlist file. When the skill
+needs to read its own files or call AnkiConnect it will prompt; choose "Always allow"
+for the relevant commands (or for the whole session) to avoid repeated prompts.
+No changes to `~/.grok/config.toml` are required for basic use.
+
+### Gemini CLI
+
+Gemini CLI has native `gemini skills` management and discovers skills in
+`~/.gemini/skills/` (and the portable `~/.agents/skills/` alias).
+
+**Easiest:** Install directly from the repo:
+
+```bash
+gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git
+```
+
+**Manual / development:**
+
+```bash
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.gemini/skills/lecture-to-anki
+# or the portable alias:
+# git clone ... ~/.agents/skills/lecture-to-anki
+```
+
+Or link a local checkout:
+
+```bash
+gemini skills link /path/to/lecture-to-anki
+```
+
+Gemini will prompt for consent the first time the skill is activated in a
+session (it gets access to the skill directory). Use `/skills list` inside Gemini
+to see installed skills.
+
+Use `--scope workspace` with `install` or `link` if you want it project-scoped
+(placed in `.gemini/skills/` or `.agents/skills/` inside the repo).
+
+### Cursor
+
+Cursor discovers skills for compatibility from `~/.cursor/skills/` and project
+`.cursor/skills/`, as well as the portable `.agents/skills/` alias.
+
+Clone or link the skill:
+
+```bash
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.cursor/skills/lecture-to-anki
+```
+
+Or for workspace/project scope (recommended when working inside a course repo):
+
+```bash
+git clone https://github.com/joffreywallaart/lecture-to-anki.git .cursor/skills/lecture-to-anki
+```
+
+Cursor also respects `~/.agents/skills/lecture-to-anki`.
+
+Cursor handles approvals in the IDE (chat composer / agent mode). No separate
+permissions file is needed. The skill activates when your prompt matches the
+description (e.g. "turn this lecture into Anki cards") or you reference it
+explicitly. You can manage Cursor rules and context in the usual `.cursor/rules/`
+or settings UI alongside this.
 
 ## Use
 
-From a folder with lecture materials, just say what you want, e.g. "turn this lecture
-into Anki cards," or invoke `/lecture-to-anki` directly. The first time, it'll ask which
-deck to use, and remember that for next time.
+From a folder with lecture materials, describe the task in natural language
+(e.g. "turn this lecture into Anki cards") or invoke the skill directly:
+
+- Claude Code: `/lecture-to-anki`
+- Grok Build: `/lecture-to-anki`
+- Gemini CLI: Describe the task (skill activates on matching description); manage
+  with `/skills` or `gemini skills`
+- Cursor: Describe the task in Agent / Composer (or reference the skill name)
+
+The first time it runs it will ask which deck to use and record the choice (in
+`CLAUDE.md`, `GEMINI.md`, or equivalent project notes). Subsequent runs reuse it.
 
 ## Design notes
 

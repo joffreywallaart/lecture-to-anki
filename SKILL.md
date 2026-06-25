@@ -21,13 +21,13 @@ Don't skip ahead. Each stage gates the next: no quiz before the deck is resolved
 
 ## Setup — avoid repeat permission prompts
 
-This skill's own files live under `~/.claude/skills/lecture-to-anki/`, outside whatever
-course folder is the working directory, and it talks to AnkiConnect on every run — both
-trigger a permission prompt per call unless allowlisted. Add this once to
-`~/.claude/settings.json` (merge into the existing `permissions.allow` array if one
-exists; substitute your actual home directory if `~` isn't expanded on your system) —
-the same content also ships as `permissions.json` in this skill's folder, to copy from
-directly:
+This skill's own files live under `~/.claude/skills/lecture-to-anki/`,
+`~/.grok/skills/lecture-to-anki/`, `~/.gemini/skills/lecture-to-anki/`,
+`~/.cursor/skills/lecture-to-anki/`, or the portable `~/.agents/skills/lecture-to-anki/`
+alias — outside the current course folder. It also talks to AnkiConnect on every run.
+
+**Claude Code:** Add the entries from `permissions.json` (shipped in the skill) to
+`~/.claude/settings.json` under `permissions.allow`:
 
 ```json
 {
@@ -41,12 +41,25 @@ directly:
 }
 ```
 
-For this to actually cover every AnkiConnect call, follow the invocation convention in
-Steps 0 and 4: simple read-only calls (no special characters) use the `curl` form above
-verbatim; anything with non-ASCII text or content that's awkward to shell-escape (card
-text, Dutch quotes, JSON with unicode) gets written to the **same fixed path**,
-`/tmp/anki_call.py`, and run as `python3 /tmp/anki_call.py` — overwrite that file each
-time rather than using a new temp filename, so the one allowlist entry keeps matching.
+**Grok Build:** No static allowlist file is needed. Grok prompts interactively.
+Approve reads of the skill directory and AnkiConnect calls ("Always allow") when
+prompted.
+
+**Gemini CLI:** Skills are installed via `gemini skills install` or by placing the
+directory under `~/.gemini/skills/` (or `~/.agents/skills/`). Gemini prompts for
+consent the first time a skill activates in a session.
+
+**Cursor:** Place the skill under `~/.cursor/skills/` or `.cursor/skills/` (or the
+`.agents/skills/` alias). Cursor manages access via its IDE approvals in Agent
+mode.
+
+**Cross-tool AnkiConnect pattern (recommended):** For reliability across tools
+(especially when shell escaping is involved), continue using simple `curl -s`
+calls for read-only checks and writing complex payloads (card content with
+unicode, quotes, etc.) to the fixed path `/tmp/anki_call.py` then running
+`python3 /tmp/anki_call.py`. For tools with native file tools (Grok `write`,
+Gemini/Cursor write operations), the agent may also directly create files in the
+lecture folder.
 
 ## Hard rules (from direct user feedback)
 
@@ -66,9 +79,11 @@ curl -s http://127.0.0.1:8765 -X POST -d '{"action": "version", "version": 6}'
 A healthy response looks like `{"result": 6, "error": null}`. If the call fails or errors, **stop** and tell the user Anki desktop must be running with the AnkiConnect add-on installed. Do not generate a static `.apkg`/`.txt` import file as a fallback — that path was deprecated because it broke the review-and-approve loop this skill is built around.
 
 **Resolve the target deck.** Per Hard Rule 2, find the one subject-area deck:
-- Check local setup files (`CLAUDE.md`, project notes) for an already-designated deck. If found, reuse it silently.
+- Check local setup files (`CLAUDE.md`, `GEMINI.md`, project notes, etc.) for an
+  already-designated deck. If found, reuse it silently.
 - If none is recorded, call `deckNames`, show the user the list, and have them pick an existing deck or name a new one (`createDeck`) — **before** drafting anything.
-- Persist the choice to the project's `CLAUDE.md` so future lectures skip this prompt.
+- Persist the choice to the project's notes file (`CLAUDE.md`, `GEMINI.md`,
+  `AGENTS.md`, `.cursorrules`, etc.) so future lectures skip this prompt.
 
 **Check for duplicates from this exact lecture.** Before generating, scan the deck so you don't silently re-add a lecture the user already studied. Prefer the **tag** — it's language-neutral and exact, unlike matching against the human-readable `Source` text:
 
@@ -147,4 +162,5 @@ Run `modelNames` first. If either custom type is missing on the active profile, 
 - `assets/quiz_template.html` — the verbatim quiz scaffold for Step 1.
 - `references/card_examples.md` — good-vs-bad card examples for Step 2.
 - `references/notetypes.md` — `createModel` payloads + CSS for the custom note types in Step 4.
-- `permissions.json` — settings snippet to avoid repeat permission prompts; see "Setup" above.
+- `permissions.json` — Claude-specific settings snippet (see "Setup" above). Other
+  tools (Grok, Gemini, Cursor) use their native interactive approval flows.
