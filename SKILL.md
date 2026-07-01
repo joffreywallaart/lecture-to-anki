@@ -52,7 +52,7 @@ Available commands (all reference `~/.claude/skills/lecture-to-anki/assets/anki.
 python3 .../anki.py version           # verify AnkiConnect is live
 python3 .../anki.py deck-names        # list available decks
 python3 .../anki.py create-deck NAME  # create a new deck
-python3 .../anki.py ensure-models     # create missing custom note types
+python3 .../anki.py ensure-models     # idempotently create custom note types
 python3 .../anki.py add-notes FILE    # add notes from a JSON array file
 python3 .../anki.py find-notes QUERY  # find notes and show Source field
 ```
