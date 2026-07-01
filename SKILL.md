@@ -27,7 +27,7 @@ Install this skill into Claude Code's skills directory:
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
 ```
 
-The skill talks to AnkiConnect on every run. Add these entries to
+The skill talks to AnkiConnect via `assets/anki.py`. Add these entries to
 `~/.claude/settings.json` under `permissions.allow`:
 
 ```json
@@ -35,24 +35,27 @@ The skill talks to AnkiConnect on every run. Add these entries to
   "permissions": {
     "allow": [
       "Read(~/.claude/skills/lecture-to-anki/**)",
-      "Bash(curl -s http://127.0.0.1:8765*)",
-      "Bash(python3 /tmp/anki_call.py)"
+      "Bash(python3 ~/.claude/skills/lecture-to-anki/assets/anki.py *)",
+      "Write(/tmp/anki_notes.json)"
     ]
   }
 }
 ```
 
-> **Windows note:** `~` conventionally means your user home directory (`%USERPROFILE%`). Use PowerShell, Git Bash, or WSL. Also update the third permission entry to match your actual temp script path (e.g. `"Bash(python %TEMP%\\anki_call.py)"`).
+> **Windows note:** `~` means your user home directory (`%USERPROFILE%`). Use PowerShell, Git Bash, or WSL, and verify the Bash permission matches the path the shell actually emits — if `~` is not expanded by the permission matcher, use the full absolute path instead.
 
-**AnkiConnect pattern (recommended):** For reliability with complex payloads
-(card content with unicode, quotes, etc.), write them to a temporary script and
-execute it:
+**AnkiConnect pattern:** Write the notes array to `/tmp/anki_notes.json`, then call the module. The module handles all HTTP details, error-checking, and duplicate filtering — never write ad-hoc AnkiConnect scripts.
 
-- Linux/macOS: `/tmp/anki_call.py` + `python3 /tmp/anki_call.py`
-- Windows: `%TEMP%\anki_call.py` (or a file in the current lecture folder) +
-  `python ...`
+Available commands (all reference `~/.claude/skills/lecture-to-anki/assets/anki.py`):
 
-The key is using a *predictable fixed location* so allow rules continue to match.
+```
+python3 .../anki.py version           # verify AnkiConnect is live
+python3 .../anki.py deck-names        # list available decks
+python3 .../anki.py create-deck NAME  # create a new deck
+python3 .../anki.py ensure-models     # create missing custom note types
+python3 .../anki.py add-notes FILE    # add notes from a JSON array file
+python3 .../anki.py find-notes QUERY  # find notes and show Source field
+```
 
 **Web search capability.** For Step 2 resource discovery, use `WebSearch` to find supplementary video explanations for concepts the user didn't know. Prioritize channels appropriate to the subject (e.g. 3Blue1Brown or Khan Academy for math, CrashCourse for humanities) and general high-quality content — language doesn't matter if it's better quality.
 
@@ -68,22 +71,22 @@ The key is using a *predictable fixed location* so allow rules continue to match
 **Verify AnkiConnect is live.** Run this first, before anything else:
 
 ```bash
-curl -s http://127.0.0.1:8765 -X POST -d '{"action": "version", "version": 6}'
+python3 ~/.claude/skills/lecture-to-anki/assets/anki.py version
 ```
 
-A healthy response looks like `{"result": 6, "error": null}`. If the call fails or errors, **stop** and tell the user Anki desktop must be running with the AnkiConnect add-on installed. Do not generate a static `.apkg`/`.txt` import file as a fallback — that path was deprecated because it broke the review-and-approve loop this skill is built around.
+A healthy response looks like `AnkiConnect 6 — OK`. If the call fails, **stop** and tell the user Anki desktop must be running with the AnkiConnect add-on installed. Do not generate a static `.apkg`/`.txt` import file as a fallback — that path was deprecated because it broke the review-and-approve loop this skill is built around.
 
 **Resolve the target deck.** Per Hard Rule 2, find the one subject-area deck:
 - Check local setup files (`CLAUDE.md`, `GEMINI.md`, project notes, etc.) for an
   already-designated deck. If found, reuse it silently.
-- If none is recorded, call `deckNames`, show the user the list, and have them pick an existing deck or name a new one (`createDeck`) — **before** drafting anything.
+- If none is recorded, run `python3 .../anki.py deck-names`, show the user the list, and have them pick an existing deck or name a new one (`python3 .../anki.py create-deck NAME`) — **before** drafting anything.
 - Persist the choice to the project's notes file (`CLAUDE.md`, `GEMINI.md`,
   `AGENTS.md`, `.cursorrules`, etc.) so future lectures skip this prompt.
 
 **Check for duplicates from this exact lecture.** Before generating, scan the deck so you don't silently re-add a lecture the user already studied. Prefer the **tag** — it's language-neutral and exact, unlike matching against the human-readable `Source` text:
 
-```
-findNotes  query:  deck:"<deck>" tag:<CourseCode>::L<n>
+```bash
+python3 .../anki.py find-notes 'deck:"<deck>" tag:<CourseCode>::L<n>'
 ```
 
 If matches turn up, report the **count** and the matched `Source` string, then ask whether to supplement, revise the existing cards, or skip this lecture. Never add silent duplicates and never skip without the user's say-so.
@@ -177,17 +180,36 @@ Then stop and wait for explicit feedback. Approve, edit, cut — the user decide
 
 Resources are only supported on Cloze cards via `Cloze (Source + Resource)`. If a Basic card warrants a resource, convert it to a Cloze or add the link directly to its `Back` field.
 
-Run `modelNames` first. If either custom type is missing on the active profile, create it with `createModel` using the layout in `assets/notetypes.md` (CSS + card templates). The `Source` field renders small and gray at the bottom of every card. The `Resource Label` and `Resource` fields render as a clickable link below Source when present.
+**Ensure note types exist.** Run this once per Anki profile — it's idempotent:
+
+```bash
+python3 ~/.claude/skills/lecture-to-anki/assets/anki.py ensure-models
+```
+
+The `Source` field renders small and gray at the bottom of every card. The `Resource Label` and `Resource` fields render as a clickable link below Source when present. See `assets/notetypes.md` for the full field reference.
 
 **Tags** combine the lecture locator with topic descriptors:
 - Lecture: `<CourseCode>::L<n>` (e.g. `TW1-11::L1`)
 - Topics: lowercase, specific (e.g. `implication`, `definitions`, `equivalences`, `translation`)
 
-**Push and verify.** `createModel`, `addNotes`, and any other call carrying card content (cloze text, non-ASCII or accented characters, embedded quotes) should use a predictable temp script location as described in the Setup section above (e.g. `/tmp/anki_call.py` on Unix or a file in the lecture folder). Push into the exact deck from Step 0, then immediately confirm with `findNotes` + `notesInfo` that the added count matches what was approved and the `Source`/fields are populated. Report the result — e.g. "added 6 cards to `Mathematics`, all with Source `TW1-11 · Proof Techniques, Les 1 · Propositional Logic`." If `addNotes` returns any `null` (a duplicate Anki rejected), say which card and why rather than reporting silent success.
+**Push and verify.** Write the approved notes as a JSON array to `/tmp/anki_notes.json` (field names and structure are in `assets/notetypes.md`), then:
+
+```bash
+python3 ~/.claude/skills/lecture-to-anki/assets/anki.py add-notes /tmp/anki_notes.json
+```
+
+The module pre-checks for duplicates, adds only valid notes, and reports any that were skipped. Confirm the result with:
+
+```bash
+python3 ~/.claude/skills/lecture-to-anki/assets/anki.py find-notes 'deck:"<deck>" tag:<CourseCode>::L<n>'
+```
+
+Report the outcome — e.g. "added 6 cards to `Mathematics`, all with Source `TW1-11 · Proof Techniques, Les 1 · Propositional Logic`."
 
 ## Files in this skill
 
+- `assets/anki.py` — CLI module for all AnkiConnect calls (see Setup for commands).
 - `assets/quiz_template.html` — the quiz scaffold for Step 1.
 - `assets/card_examples.md` — good-vs-bad card examples for Step 2.
-- `assets/notetypes.md` — `createModel` payloads + CSS for all custom note types (including `Cloze (Source + Resource)`).
+- `assets/notetypes.md` — field reference for all custom note types.
 - `permissions.json` — settings snippet for Claude Code (see "Setup" above).
