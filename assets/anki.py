@@ -178,33 +178,30 @@ def _usage() -> NoReturn:
 
 
 def main() -> None:
-    args = sys.argv[1:]
-    if not args:
-        _usage()
-
-    cmd = args[0]
-
-    if cmd == "version":
-        cmd_version()
-    elif cmd == "deck-names":
-        cmd_deck_names()
-    elif cmd == "create-deck":
-        if len(args) < 2:
+    match sys.argv[1:]:
+        case ["version"]:
+            cmd_version()
+        case ["deck-names"]:
+            cmd_deck_names()
+        case ["create-deck", name]:
+            cmd_create_deck(name)
+        case ["create-deck"]:
             sys.exit("create-deck requires a deck name")
-        cmd_create_deck(args[1])
-    elif cmd == "ensure-models":
-        cmd_ensure_models()
-    elif cmd == "add-notes":
-        if len(args) < 2:
+        case ["ensure-models"]:
+            cmd_ensure_models()
+        case ["add-notes", path]:
+            cmd_add_notes(path)
+        case ["add-notes"]:
             sys.exit("add-notes requires a JSON file path")
-        cmd_add_notes(args[1])
-    elif cmd == "find-notes":
-        if len(args) < 2:
+        case ["find-notes", query]:
+            cmd_find_notes(query)
+        case ["find-notes"]:
             sys.exit("find-notes requires a query string")
-        cmd_find_notes(args[1])
-    else:
-        print(f"Unknown command: {cmd}")
-        _usage()
+        case [cmd, *_]:
+            print(f"Unknown command: {cmd}")
+            _usage()
+        case _:
+            _usage()
 
 
 if __name__ == "__main__":
