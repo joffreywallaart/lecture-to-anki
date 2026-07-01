@@ -86,7 +86,7 @@ def _call(action, **params):
                 urllib.request.Request(ANKI_URL, payload), timeout=10
             ).read()
         )
-    except urllib.error.URLError as e:
+    except (urllib.error.URLError, TimeoutError) as e:
         sys.exit(f"AnkiConnect unreachable ({e}). Is Anki running with the AnkiConnect add-on?")
     if resp.get("error"):
         sys.exit(f"AnkiConnect error: {resp['error']}")
@@ -119,16 +119,14 @@ def cmd_ensure_models():
             continue
         actual = _call("modelFieldNames", modelName=name)
         expected = model["inOrderFields"]
-        if actual == expected:
-            print(f"  ok:      {name}")
-            continue
         missing = [f for f in expected if f not in actual]
         for field in missing:
             _call("modelFieldAdd", modelName=name, fieldName=field, index=expected.index(field))
+        # always re-push templates/CSS so fixes reach existing profiles (idempotent)
         templates = {t["Name"]: {"Front": t["Front"], "Back": t["Back"]} for t in model["cardTemplates"]}
         _call("updateModelTemplates", model={"name": name, "templates": templates})
         _call("updateModelStyling", model={"name": name, "css": model["css"]})
-        print(f"  updated: {name} (added: {missing})")
+        print(f"  updated: {name}" + (f" (added: {missing})" if missing else ""))
 
 
 def cmd_add_notes(path):
@@ -152,9 +150,10 @@ def cmd_add_notes(path):
         print("Nothing to add.")
         sys.exit(1)
 
-    _call("addNotes", notes=valid)
-    print(f"Added {len(valid)}/{len(notes)} notes.")
-    if skipped:
+    ids = _call("addNotes", notes=valid)
+    added = sum(1 for i in ids if i is not None)
+    print(f"Added {added}/{len(notes)} notes.")
+    if skipped or added < len(valid):
         sys.exit(1)
 
 

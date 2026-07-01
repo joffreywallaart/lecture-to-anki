@@ -3,8 +3,7 @@
     "allow": [
       "Read(~/.claude/skills/lecture-to-anki/**)",
       "Bash(python3 ~/.claude/skills/lecture-to-anki/assets/anki.py *)",
-      "Write(/tmp/anki_notes.json)",
-      "Write(%TEMP%\\anki_notes.json)"
+      "Write(/tmp/anki_notes.json)"
     ]
   }
 }
