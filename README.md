@@ -1,7 +1,7 @@
 # lecture-to-anki
 
 A skill for turning a lecture's materials into a quick self-quiz, and then a small,
-reviewed Anki deck. Works with Claude Code, Gemini CLI, Grok Build, and Cursor.
+reviewed Anki deck — via Claude Code.
 
 ## Why
 
@@ -23,11 +23,13 @@ math class) and adjusting the workflow until it stopped annoying me.
 2. Builds a short interactive HTML quiz (12-15 questions) to figure out what you don't
    actually know, rather than re-testing what's already solid.
 3. Drafts cards for the gaps the quiz found. The deck grows with what you're missing,
-   not with how many slides there were.
-4. Shows you every candidate card - front, back, source, tags - before any of it goes
-   into Anki. Nothing gets added without you saying yes.
+   not with how many slides there were. For concepts you didn't know, also finds one
+   high-quality video explaining them from a different angle.
+4. Shows you every candidate card - front, back, source, tags - plus supplementary
+   resources for gaps, before any of it goes into Anki. Nothing gets added without
+   you saying yes.
 5. Pushes the approved cards into a single deck via AnkiConnect, with a `Source` field
-   on each card so you can trace it back later.
+   on each card and clickable video links where found.
 
 The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 
@@ -35,14 +37,12 @@ The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 
 - [Anki](https://apps.ankiweb.net/) desktop, running
 - The [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on
-- One of: Claude Code, Grok Build, Gemini CLI, or Cursor
+- Claude Code
 
 ## Install
 
 On Windows, use PowerShell, Git Bash, or WSL, and substitute `~` with
 `$env:USERPROFILE` if your shell doesn't expand it.
-
-**Claude Code**
 
 ```bash
 git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
@@ -51,40 +51,11 @@ git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skill
 Merge [`permissions.json`](permissions.json) into `~/.claude/settings.json`
 (`permissions.allow`) to avoid repeated permission prompts.
 
-**Gemini CLI**
-
-```bash
-gemini skills install https://github.com/joffreywallaart/lecture-to-anki.git
-```
-
-Or clone manually into `~/.gemini/skills/lecture-to-anki`.
-
-**Grok Build**
-
-```bash
-git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
-# or Grok's native location: ~/.grok/skills/lecture-to-anki
-```
-
-Grok approves tool calls interactively instead of via a permissions file — choose
-"Always allow" the first time it reads the skill's files or calls AnkiConnect.
-
-**Cursor**
-
-```bash
-git clone https://github.com/joffreywallaart/lecture-to-anki.git .cursor/skills/lecture-to-anki
-```
-
-Project-scoped is recommended so the skill travels with the course folder.
-
 ## Use
 
 From a folder with lecture materials, describe the task ("turn this lecture into
-Anki cards") or invoke `/lecture-to-anki` directly (Claude Code, Grok Build). Gemini
-CLI and Cursor activate on a matching description.
-
-The first time it runs it asks which deck to use and records the choice in
-`CLAUDE.md` (or the equivalent project notes for your tool). Later runs reuse it.
+Anki cards") or invoke `/lecture-to-anki` directly. The first time it runs it asks
+which deck to use and records the choice in `CLAUDE.md`. Later runs reuse it.
 
 ## Design notes
 

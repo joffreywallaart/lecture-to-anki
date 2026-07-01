@@ -50,6 +50,62 @@ Set `isCloze: true`. Note the `{{#Back Extra}}...{{/Back Extra}}` conditional so
 }
 ```
 
+## `Cloze (Source + Resource)`
+
+Use for cards where a supplementary video resource was found. Adds a clickable link below the Source field on the card back, with a descriptive label instead of raw URL.
+
+Shared CSS (extend with this addition):
+
+```css
+.card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; }
+.source { font-size: 12px; color: #999; margin-top: 14px; }
+.resource { font-size: 14px; color: #06c; margin-top: 8px; word-break: break-all; }
+hr { margin-top: 14px; }
+```
+
+`createModel` payload (use the extended CSS above):
+
+```json
+{
+  "modelName": "Cloze (Source + Resource)",
+  "inOrderFields": ["Text", "Back Extra", "Source", "Resource Label", "Resource"],
+  "isCloze": true,
+  "css": "<extended CSS above>",
+  "cardTemplates": [
+    {
+      "Name": "Cloze",
+      "Front": "{{cloze:Text}}\n<div class=\"source\">{{Source}}</div>",
+      "Back": "{{cloze:Text}}\n<div class=\"source\">{{Source}}</div>\n{{#Resource Label}}<div class=\"resource\"><a href=\"{{Resource}}\">🎥 {{Resource Label}}</a></div>{{/Resource Label}}\n{{#Back Extra}}<hr id=answer>{{Back Extra}}{{/Back Extra}}"
+    }
+  ]
+}
+```
+
+`addNotes` example with resource:
+
+```json
+{
+  "action": "addNotes",
+  "version": 6,
+  "params": {
+    "notes": [
+      {
+        "deckName": "Mathematics",
+        "modelName": "Cloze (Source + Resource)",
+        "fields": {
+          "Text": "The implication p → q is false if and only if p is {{c1::true}} and q is {{c2::false}}.",
+          "Back Extra": "",
+          "Source": "TW1-11 · Proof Techniques, Les 1 · Propositional Logic",
+          "Resource Label": "CrashCourse: Logic & Reasoning #5",
+          "Resource": "https://www.youtube.com/watch?v=abc123"
+        },
+        "tags": ["TW1-11::L1", "implication"]
+      }
+    ]
+  }
+}
+```
+
 ## Example `addNotes` call
 
 ```json

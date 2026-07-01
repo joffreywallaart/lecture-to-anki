@@ -21,19 +21,13 @@ Don't skip ahead. Each stage gates the next: no quiz before the deck is resolved
 
 ## Setup — avoid repeat permission prompts
 
-This skill's own files live under `~/.claude/skills/lecture-to-anki/`,
-`~/.grok/skills/lecture-to-anki/`, `~/.gemini/skills/lecture-to-anki/`,
-`~/.cursor/skills/lecture-to-anki/`, or the portable `~/.agents/skills/lecture-to-anki/`
-alias — outside the current course folder. It also talks to AnkiConnect on every run.
+Install this skill into Claude Code's skills directory:
 
-> **Windows note:** `~` conventionally means your user home directory
-> (`%USERPROFILE%` on Windows). Project paths starting with `.` (e.g.
-> `.cursor/skills/`) are relative to the current folder and work identically
-> on all platforms. Prefer project-scoped installs (`.cursor/skills/`,
-> `.gemini/skills/`, etc.) and the tool's `install`/`link` commands when
-> available. See the README for full Windows guidance.
+```bash
+git clone https://github.com/joffreywallaart/lecture-to-anki.git ~/.claude/skills/lecture-to-anki
+```
 
-**Claude Code:** Add the entries from `permissions.json` (shipped in the skill) to
+The skill talks to AnkiConnect on every run. Add these entries to
 `~/.claude/settings.json` under `permissions.allow`:
 
 ```json
@@ -48,32 +42,20 @@ alias — outside the current course folder. It also talks to AnkiConnect on eve
 }
 ```
 
-**Grok Build:** No static allowlist file is needed. Grok prompts interactively.
-Approve reads of the skill directory and AnkiConnect calls ("Always allow") when
-prompted.
+> **Windows note:** `~` conventionally means your user home directory
+> (`%USERPROFILE%`). Use PowerShell, Git Bash, or WSL.
 
-**Gemini CLI:** Skills are installed via `gemini skills install` or by placing the
-directory under `~/.gemini/skills/` (or `~/.agents/skills/`). Gemini prompts for
-consent the first time a skill activates in a session.
-
-**Cursor:** Place the skill under `~/.cursor/skills/` or `.cursor/skills/` (or the
-`.agents/skills/` alias). The project-relative `.cursor/skills/` version is the
-most reliable on Windows. Cursor manages access via its IDE approvals in Agent
-mode.
-
-**Cross-tool AnkiConnect pattern (recommended):** For reliability across tools
-(especially when shell escaping is involved), use simple `curl -s` calls for
-read-only checks. For complex payloads (card content with unicode, quotes,
-etc.), write them to a temporary script and execute it:
+**AnkiConnect pattern (recommended):** For reliability with complex payloads
+(card content with unicode, quotes, etc.), write them to a temporary script and
+execute it:
 
 - Linux/macOS: `/tmp/anki_call.py` + `python3 /tmp/anki_call.py`
 - Windows: `%TEMP%\anki_call.py` (or a file in the current lecture folder) +
   `python ...`
 
-For tools with good native file tools (Grok `write`, Gemini/Cursor edit tools),
-the agent can also create the payload file directly in the lecture-materials
-directory and run it from there. The key is using a *predictable fixed location*
-so any allow/approval rules you set continue to match.
+The key is using a *predictable fixed location* so allow rules continue to match.
+
+**Web search capability.** For Step 2 resource discovery, use `WebSearch` to find supplementary video explanations for concepts the user didn't know. Prioritize established educational channels (3Blue1Brown, Khan Academy, Professor Leonard) and general high-quality content — language doesn't matter if it's better quality.
 
 ## Hard rules (from direct user feedback)
 
@@ -147,13 +129,43 @@ This is what ties deck growth to verified gaps rather than slide volume.
 
 See `references/card_examples.md` for worked good-vs-bad examples covering each principle.
 
-## Step 3 — present candidates, push nothing
+**Discover supplementary resources.** For every question the user self-rated `no`, find **one** high-quality video that explains the same concept from a different angle:
+- Extract the core concept from the question (e.g., "implication truth conditions", "contrapositive equivalence")
+- Use `WebSearch` to find one video — prioritize established educational channels, then general quality content. Language doesn't matter if it's better quality.
+- Extract or generate a descriptive label for the video (e.g., "CrashCourse: Logic & Reasoning #5" instead of raw YouTube URL)
+- Present both label and link in Step 3
 
-Show every candidate in a single markdown table with exactly these columns:
+This turns the skill from pure memorization into a complete learning loop: quiz → identify gaps → alternative explanations → cards for retention.
+
+## Step 3 — present candidates with supplementary resources, push nothing
+
+Present two sections: card candidates first, then supplementary resources for gaps.
+
+**Cards table:** Show every candidate in a markdown table with these columns:
 
 ```
 Type | Front / Text | Back / Blank | Tags
 ```
+
+For cards that have a resource, note this in the presentation (e.g., append "🎥" to the Type column).
+
+**Supplementary resources section:** Below the cards table, add a section for gaps:
+
+```markdown
+## Supplementary resources for gaps
+
+| Concept | Video Label | URL |
+|---------|-------------|-----|
+| Implication truth conditions | CrashCourse: Logic & Reasoning #5 | https://youtube.com/watch?v=... |
+| Contrapositive equivalence | 3Blue1Brown: Logical Equivalence | https://youtube.com/watch?v=... |
+```
+
+- One row per concept the user didn't know (from Step 2 resource discovery)
+- **Video Label** is a descriptive title (not raw URL) — this becomes the display text on the card
+- **URL** is the full link to the video
+- User can approve, edit labels/links, or cut resources before pushing
+
+The user sees readable titles in Step 3 and on the final card back — never raw URLs.
 
 Then stop and wait for explicit feedback. Approve, edit, cut — the user decides before any Anki write happens. This review pass is itself part of the studying, so don't rush past it.
 
@@ -162,8 +174,9 @@ Then stop and wait for explicit feedback. Approve, edit, cut — the user decide
 **Use only the custom note types**, never plain `Basic`/`Cloze`:
 - **`Basic (Source)`** — fields `Front`, `Back`, `Source`
 - **`Cloze (Source)`** — fields `Text`, `Back Extra`, `Source`
+- **`Cloze (Source + Resource)`** — fields `Text`, `Back Extra`, `Source`, `Resource`
 
-Run `modelNames` first. If either custom type is missing on the active profile, create it with `createModel` using the layout in `references/notetypes.md` (CSS + card templates). The `Source` field renders small and grey at the bottom of every card.
+Run `modelNames` first. If either custom type is missing on the active profile, create it with `createModel` using the layout in `references/notetypes.md` (CSS + card templates). The `Source` field renders small and grey at the bottom of every card. The `Resource` field renders as a clickable link below Source when present.
 
 **Tags** combine the lecture locator with topic descriptors:
 - Lecture: `<CourseCode>::L<n>` (e.g. `TW1-11::L1`)
@@ -175,6 +188,5 @@ Run `modelNames` first. If either custom type is missing on the active profile, 
 
 - `assets/quiz_template.html` — the verbatim quiz scaffold for Step 1.
 - `references/card_examples.md` — good-vs-bad card examples for Step 2.
-- `references/notetypes.md` — `createModel` payloads + CSS for the custom note types in Step 4.
-- `permissions.json` — Claude-specific settings snippet (see "Setup" above). Other
-  tools (Grok, Gemini, Cursor) use their native interactive approval flows.
+- `references/notetypes.md` — `createModel` payloads + CSS for all custom note types (including `Cloze (Source + Resource)`).
+- `permissions.json` — settings snippet for Claude Code (see "Setup" above).
