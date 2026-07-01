@@ -14,6 +14,7 @@ import json
 import sys
 import urllib.request
 import urllib.error
+from typing import Any, NoReturn
 
 ANKI_URL = "http://127.0.0.1:8765"
 
@@ -78,7 +79,7 @@ _MODELS = [
 ]
 
 
-def _call(action, **params):
+def _call(action: str, **params: Any) -> Any:
     payload = json.dumps({"action": action, "version": 6, "params": params}).encode()
     try:
         resp = json.loads(
@@ -93,23 +94,23 @@ def _call(action, **params):
     return resp["result"]
 
 
-def cmd_version():
+def cmd_version() -> None:
     v = _call("version")
     print(f"AnkiConnect {v} — OK")
 
 
-def cmd_deck_names():
+def cmd_deck_names() -> None:
     for name in sorted(_call("deckNames")):
         print(name)
 
 
-def cmd_create_deck(name):
+def cmd_create_deck(name: str) -> None:
     deck_id = _call("createDeck", deck=name)
     print(f"Deck ready: '{name}' (id {deck_id})")
 
 
 
-def cmd_ensure_models():
+def cmd_ensure_models() -> None:
     existing = set(_call("modelNames"))
     for model in _MODELS:
         name = model["modelName"]
@@ -129,7 +130,7 @@ def cmd_ensure_models():
         print(f"  updated: {name}" + (f" (added: {missing})" if missing else ""))
 
 
-def cmd_add_notes(path):
+def cmd_add_notes(path: str) -> None:
     with open(path, encoding="utf-8") as f:
         notes = json.load(f)
 
@@ -157,7 +158,7 @@ def cmd_add_notes(path):
         sys.exit(1)
 
 
-def cmd_find_notes(query):
+def cmd_find_notes(query: str) -> None:
     ids = _call("findNotes", query=query)
     if not ids:
         print("No notes found.")
@@ -171,12 +172,12 @@ def cmd_find_notes(query):
         print(f"  [{info['noteId']}] {src or fallback[:80]}")
 
 
-def _usage():
+def _usage() -> NoReturn:
     print(__doc__.strip())
     sys.exit(1)
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     if not args:
         _usage()
