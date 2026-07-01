@@ -44,7 +44,7 @@ The skill talks to AnkiConnect via `assets/anki.py`. Add these entries to
 
 > **Windows note:** `~` means your user home directory (`%USERPROFILE%`). Use PowerShell, Git Bash, or WSL, and verify the Bash permission matches the path the shell actually emits — if `~` is not expanded by the permission matcher, use the full absolute path instead.
 
-**AnkiConnect pattern:** Write the notes array to `/tmp/anki_notes.json`, then call the module. The module handles all HTTP details, error-checking, and duplicate filtering — never write ad-hoc AnkiConnect scripts.
+**AnkiConnect pattern:** Write the notes array to `/tmp/anki_notes.json` (Linux/macOS) or `%TEMP%\anki_notes.json` (Windows), then call the module. The module handles all HTTP details, error-checking, and duplicate filtering — never write ad-hoc AnkiConnect scripts.
 
 Available commands (all reference `~/.claude/skills/lecture-to-anki/assets/anki.py`):
 

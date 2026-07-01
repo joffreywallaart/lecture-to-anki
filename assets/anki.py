@@ -113,11 +113,22 @@ def cmd_ensure_models():
     existing = set(_call("modelNames"))
     for model in _MODELS:
         name = model["modelName"]
-        if name in existing:
-            print(f"  exists:  {name}")
-        else:
+        if name not in existing:
             _call("createModel", **model)
             print(f"  created: {name}")
+            continue
+        actual = _call("modelFieldNames", modelName=name)
+        expected = model["inOrderFields"]
+        if actual == expected:
+            print(f"  ok:      {name}")
+            continue
+        missing = [f for f in expected if f not in actual]
+        for field in missing:
+            _call("modelFieldAdd", modelName=name, fieldName=field, index=expected.index(field))
+        templates = {t["Name"]: {"Front": t["Front"], "Back": t["Back"]} for t in model["cardTemplates"]}
+        _call("updateModelTemplates", model={"name": name, "templates": templates})
+        _call("updateModelStyling", model={"name": name, "css": model["css"]})
+        print(f"  updated: {name} (added: {missing})")
 
 
 def cmd_add_notes(path):

@@ -38,6 +38,7 @@ The full workflow and the reasoning behind it lives in [`SKILL.md`](SKILL.md).
 - [Anki](https://apps.ankiweb.net/) desktop, running
 - The [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on
 - Claude Code
+- Python 3 (for `assets/anki.py`)
 
 ## Install
 

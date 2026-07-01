@@ -10,7 +10,7 @@ Fields: `Front`, `Back`, `Source`
 
 Fields: `Text`, `Back Extra`, `Source`
 
-Set `"isCloze": true`. Note the `{{#Back Extra}}...{{/Back Extra}}` conditional so the back stays clean when `Back Extra` is empty.
+`Back Extra` is optional — leave it empty and the back stays clean.
 
 ## `Cloze (Source + Resource)`
 
@@ -22,7 +22,7 @@ The `Resource Label` and `Resource` fields render as a clickable link (`🎥 lab
 
 ## `add-notes` payload format
 
-Write a JSON array of note objects to `/tmp/anki_notes.json`, then run `python anki.py add-notes /tmp/anki_notes.json`.
+Write a JSON array of note objects to `/tmp/anki_notes.json` (Linux/macOS) or `%TEMP%\anki_notes.json` (Windows), then run `python anki.py add-notes <path>`.
 
 **Cloze (Source):**
 
