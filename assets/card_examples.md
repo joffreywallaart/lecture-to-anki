@@ -36,7 +36,7 @@ The two clozes target independent facts (the truth value of p, the truth value o
 - **Basic** — pattern matching, judgment, translation, where a cloze boundary would feel forced. Example:
   > Front: Translate into logic: "If it rains, I get wet." → Back: rains → wet
 
-## Minimal backs
+## Clean backs
 
 **Bad:**
 > Back: Great question! So really what it comes down to is that the implication is only false in that one case, namely...

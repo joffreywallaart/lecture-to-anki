@@ -1,13 +1,13 @@
 ---
 name: lecture-to-anki
-description: Turn a lecture's static materials (slides, textbook chapter, answer key) into an interactive self-quiz and then a reviewed, gap-focused Anki deck via AnkiConnect. Use this skill whenever the user wants to study a lecture or course materials and turn them into Anki flashcards — built for the TU Delft math bachelor but applicable to any lecture-based subject. Trigger on mentions of "lecture", "college", "Anki", "flashcards", "kaartjes", "quiz me on this", "study this", a course-materials folder, or any uploaded slides/textbook/answer-key the user wants to learn from — even if they don't say the word "Anki".
+description: Turn lecture materials (slides, textbook chapter, answer key) into a gap-focused Anki deck via a self-quiz and AnkiConnect. Invoke explicitly with /lecture-to-anki when the user asks to create Anki cards or flashcards from course materials they have on hand.
 ---
 
 # Lecture → quiz → reviewed Anki deck
 
-This workflow was refined over several rounds of real user feedback. The decisions below exist because simpler versions were explicitly rejected. Don't re-derive them — follow them unless the user says otherwise.
+Follow the steps below unless the user says otherwise.
 
-The throughline: **the user's own brain is the filter.** They self-quiz, mark what they don't know, and only verified gaps become cards. You never push cards without an explicit go-ahead. Growth tracks knowledge, not slide count.
+The guiding principle: **the user's own brain is the filter.** They self-quiz, mark what they don't know, and only verified gaps become cards. You never push cards without an explicit go-ahead. Growth tracks knowledge, not slide count.
 
 ## The five stages
 
@@ -42,8 +42,7 @@ The skill talks to AnkiConnect on every run. Add these entries to
 }
 ```
 
-> **Windows note:** `~` conventionally means your user home directory
-> (`%USERPROFILE%`). Use PowerShell, Git Bash, or WSL.
+> **Windows note:** `~` conventionally means your user home directory (`%USERPROFILE%`). Use PowerShell, Git Bash, or WSL. Also update the third permission entry to match your actual temp script path (e.g. `"Bash(python %TEMP%\\anki_call.py)"`).
 
 **AnkiConnect pattern (recommended):** For reliability with complex payloads
 (card content with unicode, quotes, etc.), write them to a temporary script and
@@ -55,12 +54,12 @@ execute it:
 
 The key is using a *predictable fixed location* so allow rules continue to match.
 
-**Web search capability.** For Step 2 resource discovery, use `WebSearch` to find supplementary video explanations for concepts the user didn't know. Prioritize established educational channels (3Blue1Brown, Khan Academy, Professor Leonard) and general high-quality content — language doesn't matter if it's better quality.
+**Web search capability.** For Step 2 resource discovery, use `WebSearch` to find supplementary video explanations for concepts the user didn't know. Prioritize channels appropriate to the subject (e.g. 3Blue1Brown or Khan Academy for math, CrashCourse for humanities) and general high-quality content — language doesn't matter if it's better quality.
 
 ## Hard rules (from direct user feedback)
 
 1. **Hold for approval.** Drafted cards stay pending until the user explicitly approves, edits, or cuts. The act of reviewing each card *is* part of the studying — never bypass it by pushing eagerly.
-2. **One deck per subject area.** Consolidate into a single broad-subject deck. No `<course>::<lecture>` deck hierarchies — that lives in tags instead (see Step 4). Per-lecture separation happens through tags and the `Source` field, never through deck splitting.
+2. **One deck per subject area.** Consolidate into a single broad-subject deck. No `<course>::<lecture>` deck hierarchies — use tags for that instead (see Step 4). Per-lecture separation happens through tags and the `Source` field, never through deck splitting.
 3. **Static sources only.** Extract from slides, textbook chapters, and official answer keys. Never use audio/video recordings (e.g. Collegerama). Cross-reference the textbook to resolve vague slide concepts, and trust official answer keys over your own worked solutions.
 4. **Source goes in the Source field, never inline.** Keep the question text clean. Put full context in the dedicated `Source` field, formatted exactly: `<course code> · <course name>, Lecture <n> · <topic>` (e.g. `TW1-11 · Proof Techniques, Lecture 1 · Propositional Logic`). Use whatever word for "lecture" matches the source material's language (e.g. "Les" for Dutch) — the field is for the human reading the card, so it should read naturally in that language. The lecture *tag* (Step 0/4) stays language-neutral regardless.
 
@@ -91,7 +90,7 @@ If matches turn up, report the **count** and the matched `Source` string, then a
 
 ## Step 1 — interactive quiz (not a static markdown file)
 
-Write a self-contained `quiz.html` into the lecture-materials directory. Use the template in `assets/quiz_template.html` **verbatim** — change only the `<title>`, the `<h1>`, and the `questions` array. Keeping the layout, CSS, and interactive behaviour identical across lectures is deliberate: the user has built muscle memory around it.
+Write a self-contained `quiz.html` to the lecture-materials directory. If a `quiz.html` already exists there, ask before overwriting. Use the template in `assets/quiz_template.html` as your base scaffold — fill in `{{LECTURE_TITLE}}` (used in `<title>` and `<h1>`), `{{LANG}}` (BCP 47 language code, e.g. `en` or `nl`), and the `questions` array; keep everything else identical. Keeping the layout, CSS, and interactive behavior identical across lectures is deliberate: the user has built muscle memory around it.
 
 The questions array is a list of `[question, answer]` string pairs:
 
@@ -102,7 +101,7 @@ const questions = [
 ];
 ```
 
-Answers may contain HTML (`<br>`, `<code>`, etc.) and render as-is. Match the **language of the source material** for both the questions and the on-screen labels — the template's built-in UI text (button labels, summary) is English by default; translate those strings too if the lecture material is in another language (e.g. Dutch). Escape any literal `<`, `>`, `&` in math so it doesn't break the markup.
+Answers may contain HTML (`<br>`, `<code>`, etc.) and render as-is. Match the **language of the source material** for both the questions and the on-screen labels — the template's built-in UI text (button labels, summary) is English by default; if the lecture material is in another language, translate those strings as well. Escape any literal `<`, `>`, `&` in math so it doesn't break the markup.
 
 **Cap it at 12–15 questions.** This is a diagnostic triage tool to surface current memory gaps, not an exhaustive review. Aim for one probe per core definition or law. For application skills (translations, conditional direction, validity checks), include only 1–2 representative items rather than mirroring every slide exercise.
 
@@ -121,13 +120,13 @@ This is what ties deck growth to verified gaps rather than slide volume.
 
 **Card design — distilled from Wozniak's 20 Rules and the cloze literature:**
 - **Atomic.** One fact or mechanism per card. Split compound facts into separate notes or independent clozes rather than bundling.
-- **Meaningful clozes / desirable difficulty.** Blank out the load-bearing concept, operator, or rule — not structural syntax or filler words you could guess from context.
+- **Meaningful clozes / desirable difficulty.** Blank out the load-bearing concept, operator, or rule — not structural syntax or filler words that could be guessed from context.
 - **Standalone context (no orphans).** The front must name the theorem/rule/boundary condition so it's unambiguous months later, with no reliance on lecture order.
 - **Clean backs.** No conversational filler on the back.
 - **Type selection.** Use **Cloze** for formulas, crisp definitions, and formal laws; use **Basic** for pattern-matching, judgment calls, and translations where cloze boundaries feel forced.
 - **Independent clozes are encouraged.** `{{c1::...}}` and `{{c2::...}}` targeting *independent* facts in one note is good — Anki splits them into separate single-blank cards.
 
-See `references/card_examples.md` for worked good-vs-bad examples covering each principle.
+See `assets/card_examples.md` for worked good-vs-bad examples covering each principle.
 
 **Discover supplementary resources.** For every question the user self-rated `no`, find **one** high-quality video that explains the same concept from a different angle:
 - Extract the core concept from the question (e.g., "implication truth conditions", "contrapositive equivalence")
@@ -174,19 +173,21 @@ Then stop and wait for explicit feedback. Approve, edit, cut — the user decide
 **Use only the custom note types**, never plain `Basic`/`Cloze`:
 - **`Basic (Source)`** — fields `Front`, `Back`, `Source`
 - **`Cloze (Source)`** — fields `Text`, `Back Extra`, `Source`
-- **`Cloze (Source + Resource)`** — fields `Text`, `Back Extra`, `Source`, `Resource`
+- **`Cloze (Source + Resource)`** — fields `Text`, `Back Extra`, `Source`, `Resource Label` (display text), `Resource` (URL)
 
-Run `modelNames` first. If either custom type is missing on the active profile, create it with `createModel` using the layout in `references/notetypes.md` (CSS + card templates). The `Source` field renders small and grey at the bottom of every card. The `Resource` field renders as a clickable link below Source when present.
+Resources are only supported on Cloze cards via `Cloze (Source + Resource)`. If a Basic card warrants a resource, convert it to a Cloze or add the link directly to its `Back` field.
+
+Run `modelNames` first. If either custom type is missing on the active profile, create it with `createModel` using the layout in `assets/notetypes.md` (CSS + card templates). The `Source` field renders small and gray at the bottom of every card. The `Resource Label` and `Resource` fields render as a clickable link below Source when present.
 
 **Tags** combine the lecture locator with topic descriptors:
 - Lecture: `<CourseCode>::L<n>` (e.g. `TW1-11::L1`)
 - Topics: lowercase, specific (e.g. `implication`, `definitions`, `equivalences`, `translation`)
 
-**Push and verify.** `createModel`, `addNotes`, and any other call carrying card content (cloze text, Dutch/accented characters, embedded quotes) should use a predictable temp script location as described in the Setup section above (e.g. `/tmp/anki_call.py` on Unix or a file in the lecture folder). Push into the exact deck from Step 0, then immediately confirm with `findNotes` + `notesInfo` that the added count matches what was approved and the `Source`/fields are populated. Report the result — e.g. "added 6 cards to `Mathematics`, all with Source `TW1-11 · Proof Techniques, Les 1 · Propositional Logic`." If `addNotes` returns any `null` (a duplicate Anki rejected), say which card and why rather than reporting silent success.
+**Push and verify.** `createModel`, `addNotes`, and any other call carrying card content (cloze text, non-ASCII or accented characters, embedded quotes) should use a predictable temp script location as described in the Setup section above (e.g. `/tmp/anki_call.py` on Unix or a file in the lecture folder). Push into the exact deck from Step 0, then immediately confirm with `findNotes` + `notesInfo` that the added count matches what was approved and the `Source`/fields are populated. Report the result — e.g. "added 6 cards to `Mathematics`, all with Source `TW1-11 · Proof Techniques, Les 1 · Propositional Logic`." If `addNotes` returns any `null` (a duplicate Anki rejected), say which card and why rather than reporting silent success.
 
 ## Files in this skill
 
-- `assets/quiz_template.html` — the verbatim quiz scaffold for Step 1.
-- `references/card_examples.md` — good-vs-bad card examples for Step 2.
-- `references/notetypes.md` — `createModel` payloads + CSS for all custom note types (including `Cloze (Source + Resource)`).
+- `assets/quiz_template.html` — the quiz scaffold for Step 1.
+- `assets/card_examples.md` — good-vs-bad card examples for Step 2.
+- `assets/notetypes.md` — `createModel` payloads + CSS for all custom note types (including `Cloze (Source + Resource)`).
 - `permissions.json` — settings snippet for Claude Code (see "Setup" above).

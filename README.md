@@ -63,7 +63,7 @@ which deck to use and records the choice in `CLAUDE.md`. Later runs reuse it.
   topic instead. Splitting into lots of decks is what breaks a daily review habit.
 - Cards follow the usual spaced-repetition advice: atomic facts, short backs, clozes
   that test something real instead of guessable syntax. Worked examples are in
-  [`references/card_examples.md`](references/card_examples.md).
+  [`assets/card_examples.md`](assets/card_examples.md).
 - The quiz template ([`assets/quiz_template.html`](assets/quiz_template.html)) stays
   the same every lecture, on purpose.
 

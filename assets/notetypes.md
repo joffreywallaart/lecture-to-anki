@@ -1,6 +1,6 @@
 # Custom note types for AnkiConnect
 
-Both note types carry a dedicated `Source` field that renders small and grey at the bottom of every card. Create them with the `createModel` action only if `modelNames` shows they're missing on the active profile.
+Both note types carry a dedicated `Source` field that renders small and gray at the bottom of every card. Create them with the `createModel` action only if `modelNames` shows they're missing on the active profile.
 
 Shared CSS (use the same string for both `css` parameters):
 
@@ -32,7 +32,7 @@ hr { margin-top: 14px; }
 
 ## `Cloze (Source)`
 
-Set `isCloze: true`. Note the `{{#Back Extra}}...{{/Back Extra}}` conditional so the back stays clean when `Back Extra` is empty.
+Set `"isCloze": true`. Note the `{{#Back Extra}}...{{/Back Extra}}` conditional so the back stays clean when `Back Extra` is empty. The `Source` field appears on both the front and back by design — it acts as a context cue while recalling the answer (per Wozniak Rule 16), not as a hint.
 
 ```json
 {
