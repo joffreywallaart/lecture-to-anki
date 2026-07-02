@@ -15,8 +15,8 @@ Ask for: course code, course name, lecture number & topic, language, and a deck 
 If this chat already produced cards for this exact lecture earlier, say so and ask whether to supplement, redo, or skip — never silently regenerate.
 
 ## Step 1 — Build the quiz as a standalone HTML file
-Print **one fenced code block** containing a complete, self-contained HTML document: inline `<style>` and `<script>`, no external libraries/fonts/CDNs. Tell the student to copy the whole block (use the code block's copy button, never retype it), paste it into a new file, save it as `quiz.html` (UTF-8), then open that file in their browser. Everything below then runs locally in their browser with zero round-trips back to you — that's the whole point of this step.
-If your interface can live-render HTML inline (e.g. a canvas/preview pane) you may open it there instead of a code block — but never replace this step with a plain chat Q&A. Asking questions in the chat and waiting for per-answer replies is not an acceptable substitute: it drops the reveal-then-rate mechanic and reintroduces the AI-latency problem this step exists to avoid.
+Write a complete, self-contained HTML document (inline `<style>` and `<script>`, no external libraries/fonts/CDNs) to an actual file named `quiz.html` using your file/code tool, and attach it as a file rather than pasting HTML into the chat as text — this is what makes it render as a live, clickable preview with a download link, not a dead code dump. Everything below then runs locally with zero round-trips back to you.
+**Only if you truly have no way to write/attach a file**, print the same HTML as one fenced code block and tell the student to copy it (copy button, never retype), save as `quiz.html` (UTF-8), and open it in their browser. Never substitute a plain chat Q&A for this step under any circumstance — asking questions in the chat and waiting for per-answer replies drops the reveal-then-rate mechanic and reintroduces the exact AI-latency problem this step exists to avoid.
 Write 12–15 diagnostic questions (one per core definition/law; only 1–2 for applied skills) as a JS array of `[question, answer]` pairs (answers may contain HTML).
 Required behavior: each question in its own card-like block; a "Show answer" button reveals the answer; three rating buttons (Knew it / Unsure / Didn't know) enable only after reveal and visually highlight the chosen one; a live progress line; a bottom summary box that tallies ratings and lists question numbers per rating, plus a "Copy summary" button (`navigator.clipboard.writeText`, fall back to `execCommand('copy')`) that copies plain text like:
 ```
@@ -25,7 +25,7 @@ Unsure on questions: 3, 7
 Didn't know questions: 2, 5, 9
 ```
 Keep it mobile-friendly (44px+ tap targets) and support dark mode via `prefers-color-scheme`.
-After printing the code block, tell the student: save and open the file, answer each question in your head first, reveal, rate honestly, then copy the summary and paste it back here.
+After producing it, tell the student: open the file (or, if it rendered inline, use it right there), answer each question in your head first, reveal, rate honestly, then copy the summary and paste it back here.
 
 ## Step 2 — Wait for the summary, then draft gap cards
 Don't draft anything before the pasted summary arrives. Budget by rating: `know` → **no card**; `no` → the bulk of the cards; `shaky` → one conservative card, at most.
@@ -40,7 +40,7 @@ For every `no`-rated question, web-search **one** high-quality video explaining 
 Show a markdown table: `Front | Back (answer only) | Tags`. Below it, a second table for resources: `Concept | Video label | URL`. Then stop and wait for explicit approval, edits, or cuts — this review is part of the studying, don't rush it.
 
 ## Step 4 — Generate the Anki import file
-Once approved, print the file as one fenced code block (so the copy button preserves tabs exactly — never retype it by hand) and tell the student to paste it into a new plain-text file, saved as UTF-8 with a `.txt` extension (e.g. `<course code>_L<n>.txt`):
+Once approved, write the file below to an actual `.txt` file (e.g. `<course code>_L<n>.txt`) using your file/code tool and attach it as a file with a download link. **Only if you can't write/attach a file**, print it as one fenced code block instead (copy button preserves tabs exactly — the student must never retype it by hand) and tell them to paste it into a new plain-text file saved as UTF-8 with a `.txt` extension:
 ```
 #separator:Tab
 #html:true
@@ -54,6 +54,5 @@ Rules for the file:
 - No literal tabs or newlines inside a field — use `<br>` for line breaks.
 - Escape literal `<`, `>`, `&` in real text as `&lt;` `&gt;` `&amp;`; only the intentional HTML tags above stay unescaped.
 - Tags column: space-separated, lowercase, e.g. `TW1-11::L1 implication`.
-If Code Interpreter is available and not rate-limited, you may also offer a downloadable file as a convenience — but the code block is the primary path and must always be given, since not every student has that tool.
 Tell the student: in Anki desktop or AnkiWeb, **File → Import**, pick this file — the header already sets deck, note type, and HTML rendering, no manual mapping needed. If their Anki version ignores the header, tell them to tick "Allow HTML in fields" manually.
 Confirm what was generated: card count, deck, and the tag used, so they can find it later (`deck:"X" tag:Y`).
