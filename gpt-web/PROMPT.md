@@ -25,7 +25,7 @@ Didn't know questions: 2, 5, 9
 ```
 Keep it mobile-friendly (44px+ tap targets) and support dark mode via `prefers-color-scheme`.
 After opening the canvas, tell the student: answer each question in your head first, reveal, rate honestly, then copy the summary and paste it back here.
-**If Canvas isn't available**, fall back to Code Interpreter: write the same file to disk and give a download link, telling the student to open it locally in their browser — still fully client-side, no AI round-trips per click.
+**If Canvas isn't available**, print the same HTML as one fenced code block instead and tell the student to copy all of it into a new file named `quiz.html` (any plain text editor, save as UTF-8) and open that file in their browser — still fully client-side, no AI round-trips per click, and no dependency on Code Interpreter or its daily limits.
 
 ## Step 2 — Wait for the summary, then draft gap cards
 Don't draft anything before the pasted summary arrives. Budget by rating: `know` → **no card**; `no` → the bulk of the cards; `shaky` → one conservative card, at most.
@@ -40,7 +40,7 @@ For every `no`-rated question, web-search **one** high-quality video explaining 
 Show a markdown table: `Front | Back (answer only) | Tags`. Below it, a second table for resources: `Concept | Video label | URL`. Then stop and wait for explicit approval, edits, or cuts — this review is part of the studying, don't rush it.
 
 ## Step 4 — Generate the Anki import file
-Once approved, use **Code Interpreter** to write one plain UTF-8 `.txt` file and give the student a download link:
+Once approved, print the file as one fenced code block (so the copy button preserves tabs exactly — never retype it by hand) and tell the student to paste it into a new plain-text file, saved as UTF-8 with a `.txt` extension (e.g. `<course code>_L<n>.txt`):
 ```
 #separator:Tab
 #html:true
@@ -54,5 +54,6 @@ Rules for the file:
 - No literal tabs or newlines inside a field — use `<br>` for line breaks.
 - Escape literal `<`, `>`, `&` in real text as `&lt;` `&gt;` `&amp;`; only the intentional HTML tags above stay unescaped.
 - Tags column: space-separated, lowercase, e.g. `TW1-11::L1 implication`.
+If Code Interpreter is available and not rate-limited, you may also offer a downloadable file as a convenience — but the code block is the primary path and must always be given, since not every student has that tool.
 Tell the student: in Anki desktop or AnkiWeb, **File → Import**, pick this file — the header already sets deck, note type, and HTML rendering, no manual mapping needed. If their Anki version ignores the header, tell them to tick "Allow HTML in fields" manually.
 Confirm what was generated: card count, deck, and the tag used, so they can find it later (`deck:"X" tag:Y`).
