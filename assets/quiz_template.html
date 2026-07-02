@@ -35,6 +35,10 @@
     .progress { color: #aaa; }
   }
 </style>
+<script>
+  window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
 </head>
 <body>
 <h1>Quiz — {{LECTURE_TITLE}}</h1>
@@ -95,6 +99,17 @@ questions.forEach((q, i) => {
   rateButtons.shaky.onclick = () => setRating("shaky");
   rateButtons.no.onclick = () => setRating("no");
 });
+
+// Math in questions/answers uses \(...\) and \[...\] (same delimiters Anki's
+// reviewer recognizes). MathJax loads async, so poll until it's ready rather
+// than assuming it beat this script.
+(function typesetMath() {
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise();
+  } else {
+    setTimeout(typesetMath, 100);
+  }
+})();
 
 function updateSummary() {
   const shaky = [];

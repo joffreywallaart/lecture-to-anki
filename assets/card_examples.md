@@ -43,3 +43,19 @@ The two clozes target independent facts (the truth value of p, the truth value o
 
 **Good:**
 > Back: Only when p is true and q is false.
+
+## Math notation: LaTeX once there's real structure
+
+**Fine as plain Unicode** (single glyphs, nothing to typeset):
+> Front: What symbol denotes logical negation? → Back: ¬
+
+**Bad** (a real formula forced into Unicode — the exponent and fraction both go flat and ambiguous):
+> Front: What is the Gaussian PDF? → Back: f(x) = 1/(σ√(2π)) · e^-(x-μ)²/(2σ²)
+
+**Bad** (LaTeX, but clozing the whole formula — Anki's cloze parser stops at the *first* `}}` it finds, which lands mid-formula inside `\frac{1}{\sigma\sqrt{2\pi}}`, not at the intended end):
+> Text: The Gaussian PDF is {{c1::\(f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\)}}
+
+**Good** (Basic — recalling a whole formula from its name is a translation task, same as the logic-translation example above, and Basic fields aren't cloze-parsed so nested LaTeX braces can't collide with anything):
+> Front: State the Gaussian PDF. → Back: \(f(x) = \dfrac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\)
+
+Same `\(...\)` / `\[...\]` markup works unchanged in both the quiz and the pushed card — write it once. Reserve Cloze for LaTeX only when the blanked span is brace-free (e.g. a single variable or exponent digit); anything with its own `\frac`/`\sqrt` nested inside risks the same `}}` collision.

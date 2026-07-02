@@ -24,6 +24,8 @@ The `Resource Label` and `Resource` fields render as a clickable link (`🎥 lab
 
 Write a JSON array of note objects to `/tmp/anki_notes.json` (Linux/macOS) or `%TEMP%\anki_notes.json` (Windows), then run `python anki.py add-notes <path>`.
 
+LaTeX math content (`\(...\)`, `\[...\]`) is backslash-heavy — each backslash needs standard JSON escaping (`\\`) in the field value, same as any other JSON string.
+
 **Cloze (Source):**
 
 ```json
