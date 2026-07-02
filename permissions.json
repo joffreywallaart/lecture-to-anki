@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Read(~/.claude/skills/lecture-to-anki/**)",
+      "Read(./**)",
       "Bash(python3 ~/.claude/skills/lecture-to-anki/assets/anki.py *)",
       "Write(/tmp/anki_notes.json)",
       "WebSearch"
