@@ -74,6 +74,8 @@ python3 .../anki.py find-notes QUERY  # find notes and show Source field
 python3 ~/.claude/skills/lecture-to-anki/assets/anki.py version
 ```
 
+Run it exactly as shown, as its own isolated Bash call — don't chain it with `&&`, `;`, `|`, or anything else (e.g. no appending `ls` to also peek at the working directory). Claude Code's permission rules match each subcommand in a chain independently, so chaining anything onto this call defeats the merged `permissions.json` and triggers an approval prompt even when the user set it up exactly as documented. Same goes for every other `anki.py` call in this skill.
+
 A healthy response looks like `AnkiConnect 6 — OK`. If the call fails, **stop** and tell the user Anki desktop must be running with the AnkiConnect add-on installed. Do not generate a static `.apkg`/`.txt` import file as a fallback — that path was deprecated because it broke the review-and-approve loop this skill is built around.
 
 **Resolve the target deck.** Per Hard Rule 2, find the one subject-area deck:
