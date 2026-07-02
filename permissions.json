@@ -3,6 +3,8 @@
     "allow": [
       "Read(~/.claude/skills/lecture-to-anki/**)",
       "Read(./**)",
+      "Write(./CLAUDE.md)",
+      "Write(./quiz.html)",
       "Bash(python3 ~/.claude/skills/lecture-to-anki/assets/anki.py *)",
       "Write(/tmp/anki_notes.json)",
       "WebSearch"
