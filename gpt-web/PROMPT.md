@@ -36,6 +36,8 @@ Card design:
 - **Clean back** — the answer only, no filler.
 For every `no`-rated question, web-search **one** high-quality video explaining that concept a different way (established channels first — e.g. 3Blue1Brown/Khan Academy/CrashCourse depending on subject; quality over language match). Use a real, working URL and a short descriptive label.
 
+**Self-review before presenting.** Before Step 3, re-check every draft card against the design rules above. Fix or redraft anything that fails one; cut it if it can't be fixed. Do this even if the cards look fine at a glance — the student's approval in Step 3 is for judgment calls, not for catching rule violations you could have caught yourself.
+
 ## Step 3 — Present candidates, push nothing
 Show a markdown table: `Front | Back (answer only) | Tags`. Below it, a second table for resources: `Concept | Video label | URL`. Then stop and wait for explicit approval, edits, or cuts — this review is part of the studying, don't rush it.
 
