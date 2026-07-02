@@ -21,6 +21,12 @@ route.)
 - **Basic notes only** — no custom note types (those require desktop Anki add-ons to
   create). Source and resource link are folded into the `Back` field as small HTML,
   instead of living in dedicated `Source` / `Resource` fields.
+- **Deck stays domain-based, not per-course or per-lecture.** The GPT asks for a
+  deck name once per subject and reuses it across lectures (course/lecture context
+  lives in the tag and the `Source` line instead). A pile of tiny decks is what kills
+  a daily review habit, so don't let students name a new deck per course — this is
+  also why the ChatGPT *project* name (setup step 1) shouldn't be a course code
+  either; conflating the two invites exactly that.
 - **Quiz is a standalone HTML file**, not a back-and-forth chat. The GPT writes it
   via its file/code tool and attaches it, which — verified live in a Free-tier
   Project — makes ChatGPT render it as an interactive inline preview (clickable
@@ -34,7 +40,10 @@ route.)
 
 ## Setup (one-time, ~1 minute)
 
-1. In ChatGPT, go to **Projects → New**, name it (e.g. your course code).
+1. In ChatGPT, go to **Projects → New**, name it something generic like
+   `lecture-to-anki` — not a course code. The project name is just a label for the
+   chat; it's unrelated to the Anki deck, and reusing one project across every
+   course keeps that distinction clear (see the deck-per-domain note above).
 2. Open the project's **Instructions** and paste the contents of
    [`PROMPT.md`](PROMPT.md) (it's under 6,000 of the ~8,000 character limit — room
    to tweak).
