@@ -44,10 +44,13 @@ The two clozes target independent facts (the truth value of p, the truth value o
 **Good:**
 > Back: Only when p is true and q is false.
 
-## Math notation: LaTeX once there's real structure
+## Math notation: always LaTeX, never Unicode
 
-**Fine as plain Unicode** (single glyphs, nothing to typeset):
+**Bad** (Unicode, even for a single symbol — inconsistent with every other formula and doesn't typeset):
 > Front: What symbol denotes logical negation? → Back: ¬
+
+**Good:**
+> Front: What symbol denotes logical negation? → Back: \(\neg\)
 
 **Bad** (a real formula forced into Unicode — the exponent and fraction both go flat and ambiguous):
 > Front: What is the Gaussian PDF? → Back: f(x) = 1/(σ√(2π)) · e^-(x-μ)²/(2σ²)

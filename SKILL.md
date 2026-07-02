@@ -108,7 +108,7 @@ const questions = [
 
 Answers may contain HTML (`<br>`, `<code>`, etc.) and render as-is. Match the **language of the source material** for both the questions and the on-screen labels — the template's built-in UI text (button labels, summary) is English by default; if the lecture material is in another language, translate those strings as well. Escape any literal `<`, `>`, `&` in math so it doesn't break the markup.
 
-**Math notation.** The template loads MathJax, so real formulas should use proper LaTeX, not Unicode approximations — wrap inline math in `\(...\)` and standalone equations in `\[...\]` (same delimiters Anki's own reviewer recognizes, so this content can be reused verbatim in the cards later). Simple single-glyph notation (→, ¬, a lone Greek letter) can stay plain Unicode; reach for LaTeX once there's real structure — fractions, roots over multiple terms, multi-term exponents/subscripts, sums, integrals, matrices. Example: `\(f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\)`.
+**Math notation.** The template loads MathJax, so use proper LaTeX for math, not Unicode — wrap inline math in `\(...\)` and standalone equations in `\[...\]` (same delimiters Anki's own reviewer recognizes, so this content can be reused verbatim in the cards later). This applies to any math notation, however small — a single connective like `\(A \lor B\)` or a lone Greek letter, not just multi-term formulas. Example: `\(f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\)`.
 
 **Cap it at 12–15 questions.** This is a diagnostic triage tool to surface current memory gaps, not an exhaustive review. Aim for one probe per core definition or law. For application skills (translations, conditional direction, validity checks), include only 1–2 representative items rather than mirroring every slide exercise.
 
@@ -132,7 +132,7 @@ This is what ties deck growth to verified gaps rather than slide volume.
 - **Clean backs.** No conversational filler on the back.
 - **Type selection.** Use **Cloze** for formulas, crisp definitions, and formal laws; use **Basic** for pattern-matching, judgment calls, and translations where cloze boundaries feel forced.
 - **Independent clozes are encouraged.** `{{c1::...}}` and `{{c2::...}}` targeting *independent* facts in one note is good — Anki splits them into separate single-blank cards.
-- **Math notation.** Same rule as the quiz: LaTeX (`\(...\)` / `\[...\]`) once a formula has real structure, plain Unicode for single glyphs. Anki's reviewer renders MathJax in every field natively — no note-type or template changes needed, and no reason to fall back to Unicode approximations for anything beyond a lone symbol.
+- **Math notation.** Same rule as the quiz: always LaTeX (`\(...\)` / `\[...\]`), never Unicode, for any math notation regardless of size. Anki's reviewer renders MathJax in every field natively — no note-type or template changes needed.
 
 See `assets/card_examples.md` for worked good-vs-bad examples covering each principle.
 
