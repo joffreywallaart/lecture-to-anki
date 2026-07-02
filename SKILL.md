@@ -139,6 +139,8 @@ See `assets/card_examples.md` for worked good-vs-bad examples covering each prin
 
 This turns the skill from pure memorization into a complete learning loop: quiz → identify gaps → alternative explanations → cards for retention.
 
+**Self-review before presenting.** Before moving to Step 3, re-read every drafted card against the design rules above and `assets/card_examples.md` — atomic, meaningful cloze, standalone, clean back, right type for the content. Fix or redraft anything that fails a rule; cut it if it can't be fixed. This is a check on your own draft, not a rubber stamp — do it even when the cards look fine at a glance. The user's approval pass in Step 3 is for judgment calls (is this worth knowing, is the phrasing right), not for catching rule violations you could have caught yourself.
+
 ## Step 3 — present candidates with supplementary resources, push nothing
 
 Present two sections: card candidates first, then supplementary resources for gaps.
