@@ -8,10 +8,10 @@ text file the student imports into Anki by hand.
 Works on the **Free plan** via a ChatGPT **Project** — no Plus subscription and no
 Custom GPT required. (Creating a Custom GPT via "Explore GPTs → Create" needs Plus+;
 Projects don't have that restriction and their Instructions field has the same
-~8,000 character budget, so `PROMPT.md` works there unchanged. If you *do* have Plus
-and prefer a Custom GPT instead, the same file works there too — paste it into
-Instructions and optionally enable the Canvas/Web Search/Code Interpreter
-capabilities for a smoother experience.)
+~8,000 character budget, so `PROMPT.md` works there unchanged. The same file also
+works pasted into a Custom GPT's Instructions if you have Plus and prefer that
+route — no capabilities need enabling either way, since the quiz and export both
+work as plain code blocks rather than depending on Canvas or Code Interpreter.)
 
 ## What's different from the Claude Code skill
 
@@ -24,11 +24,12 @@ capabilities for a smoother experience.)
 - **Basic notes only** — no custom note types (those require desktop Anki add-ons to
   create). Source and resource link are folded into the `Back` field as small HTML,
   instead of living in dedicated `Source` / `Resource` fields.
-- **Quiz runs in ChatGPT Canvas** when available, not a downloaded HTML file. Canvas
-  renders the self-contained HTML/JS live and in-page, so answering, revealing, and
-  rating is instant — no per-click round trip to the model. If Canvas isn't
-  available, the GPT prints the HTML as a code block instead for the student to save
-  and open locally — same client-side snappiness, no special tools required.
+- **Quiz is a standalone HTML file**, not a back-and-forth chat. The GPT prints one
+  code block; the student saves it as `quiz.html` and opens it in their browser.
+  Answering, revealing, and rating all run locally in the page — no per-click round
+  trip to the model, and no dependency on Canvas (which turned out not to reliably
+  render inline inside a ChatGPT Project chat — it tried and silently degraded to a
+  plain Q&A in testing, dropping the reveal-then-rate mechanic entirely).
 
 ## Setup (one-time, ~1 minute)
 
@@ -39,9 +40,9 @@ capabilities for a smoother experience.)
 3. Share the project (or just the instructions text) with students, or have each
    student create their own project and paste the same instructions in.
 
-No capability toggles to configure — Projects don't have that panel. The GPT uses
-whatever tools (Canvas, web search) are available on the student's own plan, with
-fallbacks built into the prompt for when they aren't.
+No capability toggles to configure — Projects don't have that panel, and the prompt
+doesn't rely on any (web search for supplementary videos is the only optional tool
+it uses, and it degrades gracefully without it).
 
 ## Using it (student side)
 
@@ -49,8 +50,8 @@ fallbacks built into the prompt for when they aren't.
    lecture, deck name).
 2. Paste or upload the lecture material (slides, textbook excerpt, answer key —
    not a recording).
-3. Take the quiz (opens in Canvas, or as a code block to save locally), then paste
-   the copied summary back into the chat.
+3. Take the quiz: save the printed code block as `quiz.html`, open it locally, then
+   paste the copied summary back into the chat.
 4. Review the card table the GPT proposes, edit or cut anything, then approve.
 5. Copy the generated text block into a `.txt` file and import it in Anki:
    **File → Import**.
