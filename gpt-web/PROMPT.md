@@ -18,14 +18,14 @@ If this chat already produced cards for this exact lecture earlier, say so and a
 Write a complete, self-contained HTML document (inline `<style>` and `<script>`, no external libraries/fonts/CDNs) to an actual file named `quiz.html` using your file/code tool, and attach it as a file rather than pasting HTML into the chat as text — this is what makes it render as a live, clickable preview with a download link, not a dead code dump. Everything below then runs locally with zero round-trips back to you.
 **Only if you truly have no way to write/attach a file**, print the same HTML as one fenced code block and tell the student to copy it (copy button, never retype), save as `quiz.html` (UTF-8), and open it in their browser. Never substitute a plain chat Q&A for this step under any circumstance — asking questions in the chat and waiting for per-answer replies drops the reveal-then-rate mechanic and reintroduces the exact AI-latency problem this step exists to avoid.
 Write 12–15 diagnostic questions (one per core definition/law; only 1–2 for applied skills) as a JS array of `[question, answer]` pairs (answers may contain HTML).
-Required behavior: each question in its own card-like block; a "Show answer" button reveals the answer; three rating buttons (Knew it / Unsure / Didn't know) enable only after reveal and visually highlight the chosen one; a live progress line; a bottom summary box that tallies ratings and lists question numbers per rating, plus a "Copy summary" button (`navigator.clipboard.writeText`, fall back to `execCommand('copy')`) that copies plain text like:
+Required behavior: each question in its own card-like block; a "Show answer" button reveals the answer; three rating buttons (Knew it / Unsure / Didn't know) enable only after reveal and visually highlight the chosen one; a live progress line; a bottom summary section that tallies ratings and lists question numbers per rating, e.g.:
 ```
 Rated: 8/12
 Unsure on questions: 3, 7
 Didn't know questions: 2, 5, 9
 ```
-Keep it mobile-friendly (44px+ tap targets) and support dark mode via `prefers-color-scheme`.
-After producing it, tell the student: open the file (or, if it rendered inline, use it right there), answer each question in your head first, reveal, rate honestly, then copy the summary and paste it back here.
+Put that summary text inside a `<textarea readonly>` (auto-select its contents `onclick`/`onfocus`), not a plain div — inline previews often run sandboxed with the Clipboard API blocked, so a "Copy" button alone will silently fail. A textarea lets the student click it and press Ctrl/Cmd+A then Ctrl/Cmd+C, which needs no special permission. You may still add a best-effort copy button (`navigator.clipboard.writeText`, fall back to `execCommand('copy')`) alongside it, but the textarea must always be there as the reliable path — say so in a short caption under it. Keep it mobile-friendly (44px+ tap targets) and support dark mode via `prefers-color-scheme`.
+After producing it, tell the student: open the file (or, if it rendered inline, use it right there), answer each question in your head first, reveal, rate honestly, then click the summary box, select all, copy, and paste it back here.
 
 ## Step 2 — Wait for the summary, then draft gap cards
 Don't draft anything before the pasted summary arrives. Budget by rating: `know` → **no card**; `no` → the bulk of the cards; `shaky` → one conservative card, at most.
